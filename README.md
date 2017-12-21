@@ -1,0 +1,162 @@
+Repo Manifests for building systems based on meta-sdr
+=============================================
+This repository provides Repo manifests to setup the OpenEmbedded build system
+with meta-sdr and some interesting boards
+
+OpenEmbedded allows the creation of custom linux distributions for embedded
+systems. It is a collection of git repositories known as *layers* each of
+which provides *recipes* to build software packages as well as configuration
+information.
+
+Repo is a tool that enables the management of many git repositories given a
+single *manifest* file.  Tell repo to fetch a manifest from this repository and
+it will fetch the git repositories specified in the manifest and, by doing so,
+setup an OpenEmbedded build environment for you!
+
+Information about the branch names is available at
+https://wiki.yoctoproject.org/wiki/Releases. Helpful articles about working
+with GNUradio and Openembedded are at: http://www.opensdr.com/categories/.
+
+Getting Started
+---------------
+1.  Install Repo.
+
+    Download the Repo script.
+
+        $ curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > repo
+
+    Make it executable.
+
+        $ chmod a+x repo
+
+    Move it on to your system path.
+
+        $ sudo mv repo /usr/local/bin/
+
+2.  Initialize a Repo client.
+
+    Create an empty directory to hold your working files.
+
+        $ mkdir oe-repo
+        $ cd oe-repo
+
+    Create the file ~/.netrc so you can use private github repos
+
+    $ echo machine github.com login githubname password githubpw > ~/.netrc
+
+    If you are using docker, this file is likely not stored in the persistent
+    part of the container. So you may need to create it each time you start
+    a container and need to access private repositories on github.
+
+    Tell Repo where to find the manifest
+
+        $ repo init -u https://github.com/opensdr/echoridge-manifest.git -b jethro-echoridge
+
+    A successful initialization will end with a message stating that Repo is
+    initialized in your working directory. Your client directory should now
+    contain a .repo directory where files such as the manifest will be kept.
+
+    To learn more about repo, look at http://source.android.com/source/version-control.html 
+
+3.  Fetch all the repositories.
+
+        $ repo sync
+
+    Now go put on the coffee machine as this may take 20 minutes depending on
+    your connection.
+
+4.  Initialize the OpenEmbedded Environment. This assumes you created the oe-core directory
+    in your home directory.
+
+        $ TEMPLATECONF=`pwd`/meta-echoridge/conf source ./oe-core/oe-init-build-env ./build ./bitbake
+
+    This copies default configuration information into the build/conf*
+    directory and sets up some environment variables for OpenEmbedded.  You may
+    wish to edit the configuration options at this point.
+
+5.  Build an image.
+
+    This process downloads several gigabytes of source code and then proceeds to
+    do an awful lot of compilation so make sure you have plenty of space (25GB
+    minimum). Go drink some beer.
+
+        $ export MACHINE="ettus-e3xx-sg3" (default is ettus-e300)
+        $ bitbake gnuradio-dev-image
+
+    If everything goes well, you should have a compressed root filesystem
+    tarball as well as kernel and bootloader binaries available in your
+    *work/deploy* directory.  If you run into problems, the most likely
+    candidate is missing packages.  Check out
+    http://www.yoctoproject.org/docs/current/yocto-project-qs/yocto-project-qs.html#resources
+    for the list of required packagaes for operating system. Also, take
+    a look to be sure your operating system is supported:
+    https://wiki.yoctoproject.org/wiki/Distribution_Support
+
+6.  Build an SDK for cross compiling gnuradio on an x86 machine.
+
+    Run:
+
+        $ bitbake -c populate_sdk gnuradio-dev-image
+
+    When this completes the sdk is in ./tmp-eglibc/deploy/sdk/ as an .sh file
+    you copy to the machine you want to cross compile on and run the file.
+    It will default to installing the sdk in /usr/local, and you can ask it to
+    install anywhere you have write access to.
+
+Staying Up to Date
+------------------
+To pick up the latest changes for all source repositories, run:
+
+    $ repo sync
+
+Enter the OpenEmbedded environment:
+
+    $ . oe-core/oe-init-build-env ./build ./bitbake
+
+    If you forget to setup these environment variables prior to running bitbake,
+    your OS will complain that it can't find bitbake on the path.  Don't try
+    to install bitbake using a package manager, just run the command.
+
+You can then rebuild as before:
+
+    $ bitbake gnuradio-dev-image
+
+Starting from Fresh
+-------------------
+So it is borked.  You're not really sure why.  But it doesn't work any more.
+
+There are several degrees of *starting fresh*.
+
+ 1. clean a package: bitbake <package-name> -c cleansstate
+ 2. re-download package: bitbake <package-name> -c cleanall
+ 3. destroy everything but downloads: rm -rf build (or whereever your sstate and work directories are)
+ 4. destroy it all (not recommended): rm -rf build && rm -rf sources
+There are several degrees of *starting fresh*.
+
+Customize
+---------
+Sooner or later, you'll want to customize some aspect of the image either
+adding more packages, picking up some upstream patches, or tweaking your kernel.
+To this, you'll want to customize the Repo manifest to point at different
+repositories and branches or pull in additional meta-layers.
+
+Clone this repository (or fork it on github):
+
+    $ git clone git://github.com/balister/oe-gnuradio-manifest.git
+
+Make your changes (and contribute them back if they are generally useful :) ),
+and then re-initialize your repo client
+
+    $ repo init -u <file:///path/to/your/git/repository.git>
+
+Known Good Machines
+-------------------
+
+These machines have been tested:
+
+ zedboard-zynq7
+ ettus-e1xx (need to use kernel+modules from official image)
+ imx6sabre-lite
+
+Please send success stories to philip@balister.org.
+

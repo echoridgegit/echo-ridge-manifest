@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<manifest>
+	<remote name="openembedded"
+		fetch="git://github.com/openembedded" />
+
+	<remote name="Xilinx"
+		fetch="git://github.com/Xilinx" />
+
+	<remote name="balister"
+		fetch="git://github.com/balister" />
+
+	<remote name="ettus"
+		fetch="git://github.com/EttusResearch" />
+
+        <remote name="freescale"
+                fetch="git://github.com/Freescale" />
+ 
+        <remote name="yocto"
+                fetch="git://git.yoctoproject.org/" />
+ 
+        <remote name="opensdr"
+		fetch="https://github.com/OpenSDR" />
+ 
+	<default remote="openembedded" revision="master"  />
+
+	<project name="meta-ettus" remote="ettus" path="meta-ettus" revision="fb6a85a8a823f5b8da49a736417859df945e404e" />
+	<project name="bitbake"  path="bitbake" revision="bc57798ff39cae5ffea194c867e07136f7b6f3ec" />
+	<project name="openembedded-core"  path="oe-core" revision="a9db40da62c13b0010ce5afc1fde16d987bdfbc6" />
+	<project name="meta-openembedded"  remote="opensdr" path="meta-openembedded" revision="ea6ebedd631aaab4eddc452aa9b285d33a489af6"  />
+	<project name="meta-xilinx" remote="Xilinx" path="meta-xilinx" revision="b271330b745ead404ddb8a9912db44da6fbbf968" />
+	<project name="meta-sdr" remote="balister" path="meta-sdr" revision="8c62244595165afd1af37b887c49c54f3a21f966" />
+	<project name="meta-echoridge" remote="opensdr" path="meta-echoridge" revision="2bd40a27dc054f0a07564f1ce0be9f9d4d0834bd" />
+
+</manifest>
